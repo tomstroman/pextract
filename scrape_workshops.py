@@ -31,10 +31,10 @@ for row in nested_table.find_all("tr"):
 
     match = DESCRIPTION.search(td)
     output_data = {
-        "Index": match.group("num"),
-        "AuthorOverride": match.group("authors"),
-        "Title": match.group("title"),
-        "Description": match.group("desc"),
+        "visibleID": match.group("num"),
+        "authorOverride": match.group("authors"),
+        "title": match.group("title"),
+        "description": match.group("desc"),
     }
 
     for key, res in {"res1": res1, "res2": res2, "res3": res3}.items():
@@ -52,11 +52,14 @@ for row in nested_table.find_all("tr"):
             if (img_tag := res.find("img")):
                 img = img_tag.get("src")
     
+        if url is not None:
+            url = url[3:] if url.startswith("../") else f"workshops/{url}"
+
         output_data.update(
             {
                 url_key: url,
                 target_key: target,
-                img_key: img,
+                img_key: img[3:] if img.startswith("../") else img,
             }
         )
 
@@ -65,8 +68,9 @@ for row in nested_table.find_all("tr"):
 
 
 if field_names is not None:
-    with open("workshops_data.csv", "w", encoding="utf-8-sig") as outcsv:
+    with open("workshops_data.csv", "w", encoding="utf-8") as outcsv:
         writer = csv.DictWriter(outcsv, field_names, quoting=csv.QUOTE_NONNUMERIC)
+        writer.writeheader()
         writer.writerows(data)
 
 
